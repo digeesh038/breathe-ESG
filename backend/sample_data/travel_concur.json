@@ -1,0 +1,33 @@
+{
+  "_comment": "Shape modeled on Concur/Navan: trips contain typed segments. Flights often give only IATA codes with no distance; hotels give nights; ground gives distance or duration. See SOURCES.md.",
+  "trips": [
+    {
+      "trip_id": "TRP-2025-0001",
+      "traveler_id": "EMP-3391",
+      "booked_at": "2025-03-02T09:14:00Z",
+      "segments": [
+        {"type": "flight", "from": "LHR", "to": "JFK", "cabin": "economy", "depart": "2025-03-10", "distance_km": null},
+        {"type": "flight", "from": "JFK", "to": "LHR", "cabin": "economy", "depart": "2025-03-14", "distance_km": null},
+        {"type": "hotel", "city": "New York", "nights": 4, "checkin": "2025-03-10"},
+        {"type": "ground", "mode": "taxi", "distance_km": 28.0, "date": "2025-03-10"}
+      ]
+    },
+    {
+      "trip_id": "TRP-2025-0002",
+      "traveler_id": "EMP-1180",
+      "booked_at": "2025-03-20T16:40:00Z",
+      "segments": [
+        {"type": "flight", "from": "LHR", "to": "MUC", "cabin": "business", "depart": "2025-03-25", "distance_km": 945.0},
+        {"type": "rail", "from": "MUC", "to": "Stuttgart", "distance_km": 220.0, "date": "2025-03-26"}
+      ]
+    },
+    {
+      "trip_id": "TRP-2025-0003",
+      "traveler_id": "EMP-2204",
+      "booked_at": "2025-04-01T11:05:00Z",
+      "segments": [
+        {"type": "flight", "from": "LHR", "to": "JFK", "cabin": "economy", "depart": "2025-04-08", "distance_km": 50.0}
+      ]
+    }
+  ]
+}

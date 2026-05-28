@@ -1,0 +1,21 @@
+# Runtime dependencies. Pin in your lockfile before deploying.
+Django>=5.0,<5.2
+djangorestframework>=3.15
+djangorestframework-simplejwt>=5.3      # JWT access/refresh tokens
+django-environ>=0.11                    # 12-factor config from env vars
+psycopg[binary]>=3.1                    # PostgreSQL driver
+django-cors-headers>=4.3                # React dev server -> API
+django-filter>=24.1                     # review-dashboard filtering
+gunicorn>=22.0                          # prod WSGI server
+whitenoise>=6.6                         # static files in prod
+# Source parsing
+pandas>=2.2                             # tabular SAP / utility CSV wrangling
+python-dateutil>=2.9                    # tolerant date parsing (SAP/utility formats)
+openpyxl>=3.1                           # .xlsx export
+# Async pipeline (large batches)
+celery[redis]>=5.4                      # background ingestion / normalization
+redis>=5.0                              # broker + result backend
+# Object storage for uploads in prod (activated via USE_S3=True)
+django-storages[s3]>=1.14               # S3 backend for ingestion files
+# Optional error tracking (activated via SENTRY_DSN)
+sentry-sdk>=2.0                         # crash / performance reporting

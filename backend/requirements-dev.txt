@@ -1,0 +1,7 @@
+-r requirements.txt
+
+pytest>=8.0
+pytest-django>=4.8
+factory-boy>=3.3              # test fixtures for multi-tenant data
+ruff>=0.4                     # lint + format
+django-debug-toolbar>=4.3

@@ -1,0 +1,7 @@
+account_number,meter_id,site_name,period_start,period_end,consumption,unit,tariff_band,supplier
+ACC-88231,MTR-001,London HQ,2025-03-14,2025-04-12,18450.0,kWh,day,GridCo Energy
+ACC-88231,MTR-001,London HQ,2025-03-14,2025-04-12,7320.5,kWh,night,GridCo Energy
+ACC-88231,MTR-002,Manchester DC,2025-03-01,2025-03-31,1.245,MWh,flat,GridCo Energy
+ACC-90014,MTR-101,Munich Plant,2025-03-10,2025-04-09,42180.0,kWh,flat,Stadtwerke
+ACC-88231,MTR-003,London HQ,2025-04-01,2025-04-30,-120.0,kWh,flat,GridCo Energy
+ACC-90014,MTR-104,Munich Plant,2025-05-10,2025-04-09,5000.0,kWh,flat,Stadtwerke

@@ -1,0 +1,10 @@
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "DJ"]
+ignore = ["E501"]  # line length is enforced by the formatter, not the linter
+
+[lint.per-file-ignores]
+"*/migrations/*" = ["E", "F", "I", "UP"]
+"*/settings/*" = ["F403", "F405"]
