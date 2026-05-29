@@ -7,6 +7,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import environ
+from corsheaders.defaults import default_headers
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -71,6 +72,11 @@ TEMPLATES = [
 ]
 
 DATABASES = {"default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
+
+# The SPA sends a custom X-Organization header to scope requests to a tenant.
+# It isn't a CORS-safelisted header, so it must be explicitly allowed or the
+# preflight blocks every authenticated cross-origin request.
+CORS_ALLOW_HEADERS = (*default_headers, "x-organization")
 
 # Custom user lives on the tenants app so org membership is first-class.
 AUTH_USER_MODEL = "tenants.User"

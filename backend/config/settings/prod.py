@@ -12,8 +12,14 @@ if not SECRET_KEY or SECRET_KEY == "dev-insecure-key":
 
 # Hosting platforms set this; e.g. esg-api.onrender.com
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
-CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+
+# The Vercel frontend talks to this API cross-origin. Default to the known
+# deployment origin so the app works out of the box; override via env to add
+# more origins. Preview deploys (esg-*.vercel.app) are matched by regex.
+_DEFAULT_FRONTEND_ORIGIN = "https://breathe-esg-eight-indol.vercel.app"
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[_DEFAULT_FRONTEND_ORIGIN])
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[_DEFAULT_FRONTEND_ORIGIN])
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^https://breathe-esg.*\.vercel\.app$"]
 
 # Reuse DB connections across requests (managed Postgres). 0 = new conn per
 # request, which is wasteful under load.
