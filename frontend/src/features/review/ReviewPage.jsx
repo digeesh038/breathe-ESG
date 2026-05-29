@@ -262,7 +262,7 @@ export function ReviewPage() {
                   ))}
                 </tr>
               ))}
-              {total === 0 && !isLoading && (
+              {total === 0 && !isLoading && !isError && (
                 <tr>
                   <td colSpan={columns.length} className="empty">
                     No items in this view.
