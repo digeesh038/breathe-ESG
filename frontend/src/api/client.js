@@ -9,10 +9,12 @@ import axios from "axios";
 const ACCESS_KEY = "esg_access";
 const REFRESH_KEY = "esg_refresh";
 
+// Default to a same-origin "/api/v1" path. In dev the Vite proxy forwards it to
+// localhost:8000; in prod the Vercel rewrite (see vercel.json) forwards it to
+// the Render backend. Staying same-origin avoids CORS entirely. Override with
+// VITE_API_BASE_URL to point directly at an absolute backend URL.
 export const apiClient = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_BASE_URL ||
-    "https://breathe-esg-bcx4.onrender.com/api/v1",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "/api/v1",
 });
 
 // Apply auth headers globally
