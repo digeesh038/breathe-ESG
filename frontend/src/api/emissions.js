@@ -18,10 +18,12 @@ export const emissionsApi = {
   deleteActivity: (id) => apiClient.delete(`/emissions/activities/${id}/`),
 
   // Streams CSV or XLSX bytes for download. Filters apply via querystring.
+  // NB: the param is `fmt`, not `format` — `format` is reserved by DRF for
+  // content negotiation and would 404 before the export view runs.
   exportActivities: (format = "csv", params = {}) =>
     apiClient
       .get("/emissions/act_xport/", {
-        params: { format, ...params },
+        params: { fmt: format, ...params },
         responseType: "blob",
       })
       .then((r) => r.data),

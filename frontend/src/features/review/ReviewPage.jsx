@@ -27,19 +27,19 @@ export function ReviewPage() {
   const [selected, setSelected] = useState(null);
 
   const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
   const status = filter === "all" ? undefined : filter;
   const { data, isLoading, isError, approve, reject } = useReviewItems(status);
 
   async function downloadExport(format) {
     setExporting(true);
+    setExportError("");
     try {
-      console.log(`Downloading export in format: ${format}`);
       const blob = await emissionsApi.exportActivities(format);
       const ext = format === "xlsx" ? "xlsx" : "csv";
       saveAs(blob, `emissions_${new Date().toISOString().slice(0, 10)}.${ext}`);
     } catch (err) {
-      console.error("Export download failed:", err);
-      alert(`Export failed: ${err.response?.data?.message || err.message}`);
+      setExportError(`Export failed: ${err.response?.data?.detail || err.message}`);
     } finally {
       setExporting(false);
     }
@@ -201,6 +201,12 @@ export function ReviewPage() {
           </div>
         }
       />
+
+      {exportError && (
+        <p className="error-text" role="alert" style={{ marginTop: "0.5rem" }}>
+          {exportError}
+        </p>
+      )}
 
       <div className="segmented">
         {FILTERS.map((f) => (

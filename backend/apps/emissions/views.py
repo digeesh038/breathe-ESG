@@ -114,10 +114,11 @@ class ActivityRecordViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
     def export(self, request):
         """Stream the (filtered) record set as CSV or XLSX for auditor handoff.
 
-        Driven by `?format=csv|xlsx`. Applies the same filters as the list
-        endpoint so an analyst can export exactly what they see.
+        Driven by `?fmt=csv|xlsx`. (Not `format` — that's reserved by DRF for
+        content negotiation and 404s before this view runs.) Applies the same
+        filters as the list endpoint so an analyst can export what they see.
         """
-        fmt = request.query_params.get("format", "csv").lower()
+        fmt = request.query_params.get("fmt", "csv").lower()
         qs = self.filter_queryset(self.get_queryset()).select_related(
             "emission_factor", "review"
         ).prefetch_related("review__flags")
