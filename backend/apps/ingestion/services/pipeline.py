@@ -4,6 +4,8 @@ One bad row never kills the batch — parse failures fail the whole batch (the
 file is unreadable), but per-row normalization errors mark just that RawRecord
 FAILED with the reason, which the analyst sees in the dashboard.
 """
+import logging
+
 from django.conf import settings
 from django.db import transaction
 
@@ -16,6 +18,8 @@ from apps.ingestion.adapters.utility import UtilityAdapter
 from apps.ingestion.models import IngestionBatch, RawRecord
 from apps.review.models import AnomalyFlag, ReviewItem
 from apps.review.services.anomaly import evaluate
+
+logger = logging.getLogger("apps.ingestion")
 
 ADAPTERS = {
     "sap": SAPAdapter,
@@ -73,38 +77,43 @@ def run_batch(batch: IngestionBatch, raw_bytes: bytes) -> IngestionBatch:
     )
 
     # 2. Normalize each stored row -> ActivityRecord + ReviewItem + flags.
+    # A single bad row must never kill the batch. Each row runs in its own
+    # savepoint so partial writes roll back cleanly, and any failure marks just
+    # that RawRecord FAILED. We catch broadly (not only IngestionError) because
+    # a wrong-format file makes adapters raise KeyError/ValueError/etc. — that's
+    # bad data, not a server bug, so it should fail the row, not 500 the batch.
     error_count = 0
     for raw in batch.raw_records.order_by("row_number"):
         try:
-            normalized = adapter.normalize(raw.payload, config)
-        except IngestionError as exc:
+            with transaction.atomic():
+                normalized = adapter.normalize(raw.payload, config)
+                activity = build_activity_record(normalized, batch, raw, batch.organization)
+                raw.status = RawRecord.Status.NORMALIZED
+                raw.save(update_fields=["status"])
+
+                review_item = ReviewItem.objects.create(
+                    organization=batch.organization, activity=activity
+                )
+                flags = evaluate(activity, raw, normalized)
+                for f in flags:
+                    f.organization = batch.organization
+                    f.review_item = review_item
+                AnomalyFlag.objects.bulk_create(flags)
+
+                # Provenance: record where this normalized row came from.
+                record_event(
+                    organization=batch.organization,
+                    actor=batch.created_by,
+                    action="created",
+                    target=activity,
+                    changes={"source": batch.source.source_type, "batch": batch.id, "row": raw.row_number},
+                )
+        except Exception as exc:  # noqa: BLE001 — bad data fails the row, not the batch
+            logger.warning("Batch %s row %s failed to normalize: %s", batch.id, raw.row_number, exc)
             raw.status = RawRecord.Status.FAILED
-            raw.error = str(exc)
+            raw.error = str(exc) if isinstance(exc, IngestionError) else f"{type(exc).__name__}: {exc}"
             raw.save(update_fields=["status", "error"])
             error_count += 1
-            continue
-
-        activity = build_activity_record(normalized, batch, raw, batch.organization)
-        raw.status = RawRecord.Status.NORMALIZED
-        raw.save(update_fields=["status"])
-
-        review_item = ReviewItem.objects.create(
-            organization=batch.organization, activity=activity
-        )
-        flags = evaluate(activity, raw, normalized)
-        for f in flags:
-            f.organization = batch.organization
-            f.review_item = review_item
-        AnomalyFlag.objects.bulk_create(flags)
-
-        # Provenance: record where this normalized row came from.
-        record_event(
-            organization=batch.organization,
-            actor=batch.created_by,
-            action="created",
-            target=activity,
-            changes={"source": batch.source.source_type, "batch": batch.id, "row": raw.row_number},
-        )
 
     # 3. Summarize the batch.
     batch.row_count = batch.raw_records.count()

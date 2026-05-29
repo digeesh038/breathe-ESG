@@ -19,14 +19,22 @@ export function IngestionPage() {
   const upload = useMutation({
     mutationFn: ({ id, file }) => ingestionApi.upload(id, file),
     onSuccess: (batch) => {
-      setMessage(`Ingested ${batch.original_filename}: ${batch.row_count} rows, ${batch.error_count} errors.`);
+      if (batch.status === "failed") {
+        setMessage(
+          batch.notes ||
+            `Couldn't ingest ${batch.original_filename}: all ${batch.row_count} rows failed — check the file matches the selected source type.`,
+        );
+      } else {
+        setMessage(`Ingested ${batch.original_filename}: ${batch.row_count} rows, ${batch.error_count} errors.`);
+      }
       qc.invalidateQueries({ queryKey: ["batches"] });
       qc.invalidateQueries({ queryKey: ["review-items"] });
       qc.invalidateQueries({ queryKey: ["activities"] });
       qc.invalidateQueries({ queryKey: ["summary"] });
       if (fileRef.current) fileRef.current.value = "";
     },
-    onError: () => setMessage("Upload failed."),
+    onError: (err) =>
+      setMessage(`Upload failed: ${err.response?.data?.detail || err.message}`),
   });
 
   function onSubmit(e) {
